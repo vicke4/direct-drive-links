@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <base target="_blank">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Picker Example</title>
+
+    <script type="text/javascript">
+      // Prevent forms from submitting.
+      function preventFormSubmit() {
+        var forms = document.querySelectorAll('form');
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].addEventListener('submit', function(event) {
+            event.preventDefault();
+          });
+        }
+      }
+
+      window.addEventListener('load', preventFormSubmit);
+
+      // The Browser API key obtained from the Google API Console.
+      var developerKey = 'AIzaSyBrB-P5ez5d5Ijp-dcEhVImtoUOeOs1-4I';
+
+      // The Client ID obtained from the Google API Console. Replace with your own Client ID.
+      var clientId = '520711270513-c4fjeqdpipil4en43k2tolceun4o1248.apps.googleusercontent.com';
+
+      // Scope to use to access user's photos.
+      var scope = 'https://www.googleapis.com/auth/photos';
+
+      var appId = '520711270513';
+
+      var pickerApiLoaded = false;
+      var oauthToken;
+      var onlyMe;
+
+      function onApiLoad() {
+        google.script.run.withSuccessHandler(setOAuthToken).getOAuthToken();
+        gapi.load('picker', onPickerApiLoad);
+      }
+
+      function setOAuthToken(token) {
+        oauthToken = token;
+        createPicker();
+      }
+
+      function onAuthApiLoad() {
+        var authBtn = document.getElementById('auth');
+        authBtn.disabled = false;
+        authBtn.addEventListener('click', function() {
+          gapi.auth2.authorize({
+            client_id: clientId,
+            scope: scope
+          }, handleAuthResult);
+        });
+      }
+
+      function onPickerApiLoad() {
+        pickerApiLoaded = true;
+        createPicker();
+      }
+
+      function toggleSpinner(action) {
+        var spinner = document.getElementById('spinner');
+        spinner.style.display = action === 'hide' ? 'none' : 'block';
+
+        var instruction = document.getElementById('copy-instruction');
+        instruction.style.display = action === 'hide' ? 'block' : 'none';
+      }
+
+      function handleAuthResult(authResult) {
+        if (authResult && !authResult.error) {
+          oauthToken = authResult.access_token;
+          createPicker();
+        }
+      }
+
+      // Create and render a Picker object for picking user Photos.
+      function createPicker() {
+        if (pickerApiLoaded && oauthToken) {
+          var hiddenInputEle = document.getElementById('sharedWithMe');
+          onlyMe = hiddenInputEle.value === 'true' ? false : true;
+
+          var docsView = new google.picker.DocsView(google.picker.ViewId.FOLDERS).
+            setIncludeFolders(true).
+            setSelectFolderEnabled(true);
+
+          if (onlyMe) docsView.setOwnedByMe(true);
+
+          var picker = new google.picker.PickerBuilder().
+              enableFeature(google.picker.Feature.NAV_HIDDEN).
+              enableFeature(google.picker.Feature.MULTISELECT_ENABLED).
+              hideTitleBar().
+              setAppId(appId).
+              setOAuthToken(oauthToken).
+              setDeveloperKey(developerKey).
+              setCallback(pickerCallback).
+              addView(docsView).
+              setOrigin(google.script.host.origin).
+              setSize(595, 300).
+              build();
+
+          toggleSpinner('hide');
+          picker.setVisible(true);
+        }
+      }
+
+      // A simple callback implementation.
+      function pickerCallback(data) {
+        if (data.action === google.picker.Action.PICKED) {
+          toggleSpinner('show');
+          google.script.run.withSuccessHandler(closeDialog).folderPicked(data.docs, onlyMe);
+        } else if (data.action === google.picker.Action.CANCEL) {
+          closeDialog();
+        }
+      }
+
+      function closeDialog() {
+        google.script.host.close();
+      }
+    </script>
+    <style>
+      #spinner {
+        margin: 25% auto;
+        display: block;
+        height: 40px;
+        width: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <div id="result"></div> -->
+    <svg id="spinner" width="95px"  height="95px"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-rolling" style="background: none;"><circle cx="50" cy="50" fill="none" ng-attr-stroke="{{config.color}}" ng-attr-stroke-width="{{config.width}}" ng-attr-r="{{config.radius}}" ng-attr-stroke-dasharray="{{config.dasharray}}" stroke="#1c4595" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138" transform="rotate(176 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="1.5s" begin="0s" repeatCount="indefinite"></animateTransform></circle></svg>
+
+    <p id="copy-instruction" style="display: none;">Press and hold ctrl key to select multiple folders.</p>
+
+    <input id="sharedWithMe" value="<?!= sharedWithMe ?>" hidden />
+    <!-- The Google API Loader script. -->
+    <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+  </body>
+</html>

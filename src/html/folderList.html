@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_blank">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <title>Select folder type prompt</title>
+
+    <script type="text/javascript">
+      function removeFolder() {
+        google.script.run.withSuccessHandler(closeDialog).showRemoveFolderPrompt();
+      }
+
+      function closeDialog() {
+        google.script.host.close();
+      }
+
+      function toggleSpinner(action) {
+        var spinner = document.getElementById('spinner');
+        spinner.style.display = action === 'hide' ? 'none' : 'block';
+
+        var instruction = document.getElementById('main-block');
+        instruction.style.display = action === 'hide' ? 'block' : 'none';
+      }
+
+      function openPicker() {
+        var hiddenInputEle = document.getElementById('sharedWithMe');
+        google.script.run.withSuccessHandler(closeDialog).showPicker(hiddenInputEle.value === 'true', false);
+      }
+
+      function generateLinks() {
+        toggleSpinner('show');
+
+        var recursivePickEle = document.getElementById('recursivePick');
+        var hiddenInputEle = document.getElementById('sharedWithMe');
+
+        google.script.run.withSuccessHandler(closeDialog).generateLinks(recursivePickEle.checked, hiddenInputEle.value === 'true');
+      }
+
+      function resetCustomFolders() {
+        google.script.run.withSuccessHandler(closeDialog).resetCustomFolders();
+      }
+    </script>
+    <style>
+      .btn-group {
+        position: absolute;
+        bottom: 0;
+      }
+
+      ul {
+        margin: 0;
+        height: 195px;
+        overflow: auto;
+      }
+
+      #spinner {
+        margin: 25% auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <? if (Object.keys(folderList).length === 0) { ?>
+      <p>Folder list is empty. You can add folders by selecting 'Add a folder'.</p>
+    <? } ?>
+
+    <div style="display: none;" id="spinner">
+      <p>Please wait, this dialog will close automatically once the links are ready.</p>
+    </div>
+
+    <input id="sharedWithMe" value="<?!= sharedWithMe ?>" hidden />
+
+    <div id="main-block">
+      <ul>
+        <? Object.keys(folderList).forEach(function(folderId) { ?>
+          <li><?= folderList[folderId] ?></li>
+        <? }) ?>
+      </ul>
+
+      <br />
+
+      <? if (Object.keys(folderList).length > 0) { ?>
+        <div class="block form-group">
+          <input type="checkbox" id="recursivePick">
+          <label for="recursivePick">Recursively pick folders <a href="https://www.syncwithtech.org/google-drive-direct-links/">learn more</a></label>
+        </div>
+      <? } ?>
+
+      <br />
+
+      <div class="btn-group">
+        <button class="action" onclick=generateLinks();>Generate</button>
+        <button class="share" type="button" onclick=openPicker();>Add a folder</button>
+
+        <? if (Object.keys(folderList).length > 0) { ?>
+          <button class="create" type="button" onclick=removeFolder();>Remove a folder</button>
+        <? } ?>
+
+        <button class="action" type="button" onclick=resetCustomFolders();>Reset</button>
+      </div>
+    </div>
+  </body>
+</html>

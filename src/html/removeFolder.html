@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_blank">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <title>Select folder type prompt</title>
+
+    <script type="text/javascript">
+      // Prevent forms from submitting.
+      function preventFormSubmit() {
+        var forms = document.querySelectorAll('form');
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].addEventListener('submit', function(event) {
+            event.preventDefault();
+          });
+        }
+      }
+
+      function validateForm(formObj, callback) {
+        var curId = document.getElementById('folder-error');
+        var invalid;
+
+        if (formObj.folder.value === '0') {
+          curId.innerHTML = 'You have to select a folder';
+          invalid = true;
+        }
+
+        callback(invalid);
+      }
+
+      function handleFormSubmit(formObject) {
+        validateForm(formObject, function (err) {
+          if (!err) {
+            google.script.run.withSuccessHandler(closeDialog).processRemoveFolder(formObject.folder.value);
+          }
+        });
+      }
+
+      function closeDialog() {
+        google.script.host.close();
+      }
+
+      window.addEventListener('load', preventFormSubmit);
+    </script>
+    <style>
+      #folderSelect {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="cryptoForm" onsubmit="handleFormSubmit(this)">
+      <div class="block form-group">
+        <select name="folder" id="folderSelect">
+          <option value=0>Select a Folder</option>
+            <? Object.keys(folderList).forEach(function(folderId) { ?>
+              <option value="<?!= folderId ?>">
+                <?!= folderList[folderId] ?>
+              </option>
+            <? }) ?>
+        </select>
+        <span class="error" id="folder-error"></span>
+      </div>
+
+      <br />
+
+      <div class="btn-group">
+        <input class="action" type="submit" value="Remove" style="margin-right: 10px"/>
+        <button type="button" onclick=closeDialog();>Cancel</button>
+        <a class="button" style="margin-left: 12px"
+          href="https://www.syncwithtech.org/google-drive-direct-links/" onclick="google.script.host.close();">
+           &nbsp; Help &nbsp;
+        </a>
+      </div>
+    </form>
+  </body>
+</html>

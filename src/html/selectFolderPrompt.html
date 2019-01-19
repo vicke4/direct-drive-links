@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_blank">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <title>Select folder type prompt</title>
+
+    <script type="text/javascript">
+      // Prevent forms from submitting.
+      function preventFormSubmit() {
+        var forms = document.querySelectorAll('form');
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].addEventListener('submit', function(event) {
+            event.preventDefault();
+          });
+        }
+      }
+
+      function toggleSpinner(action) {
+        var spinner = document.getElementById('spinner');
+        spinner.style.display = action === 'hide' ? 'none' : 'block';
+
+        var form = document.getElementById('cryptoForm');
+        form.style.display = action === 'hide' ? 'block' : 'none';
+      }
+
+
+      function submitValue(formValues) {
+        google.script.run.withSuccessHandler(closeDialog).showPicker(formValues.sharedWithMe.checked, true);
+      }
+
+      function closeDialog() {
+        google.script.host.close();
+      }
+
+      function allFoldersHandler() {
+        var sharedWithMeCheckboxEle = document.getElementById('sharedWithMe');
+        toggleSpinner('show');
+        google.script.run.withSuccessHandler(closeDialog).allFoldersHandler(sharedWithMeCheckboxEle.checked);
+      }
+
+      window.addEventListener('load', preventFormSubmit);
+    </script>
+    <style>
+      #spinner {
+        margin: 0 auto;
+        display: block;
+      }
+
+      #spinner p {
+        margin: 2% auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="display: none;" id="spinner">
+      <p>Please wait, this dialog will close automatically once the links are ready.</p>
+    </div>
+
+    <form id="cryptoForm" onsubmit="submitValue(this)">
+      <div class="block form-group">
+        <input type="checkbox" id="sharedWithMe">
+        <label for="sharedWithMe">Include Shared with me folders</label>
+      </div>
+
+      <br />
+
+      <input class="action" type="submit" value="Selected folders" style="margin-right: 10px"/>
+      <button style="margin-right: 10px" type="button" onclick="allFoldersHandler();">All folders</button>
+      <a class="button" href="https://www.syncwithtech.org/google-drive-direct-links/" onclick="google.script.host.close();">
+        &nbsp; Help &nbsp;
+      </a>
+    </form>
+  </body>
+</html>

@@ -25,6 +25,6 @@
     "no-underscore-dangle": 0
   },
   "globals": {
-    "YouTube": true
+    "Drive": true
   }
 }
