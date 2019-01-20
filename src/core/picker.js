@@ -93,5 +93,6 @@ export {
   processRemoveFolder,
   resetCustomFolders,
   showPicker,
+  showPrompt,
   showRemoveFolderPrompt
 };

@@ -10,6 +10,7 @@ import {
   processRemoveFolder,
   resetCustomFolders,
   showPicker,
+  showPrompt,
   showRemoveFolderPrompt
 } from './core';
 import { getOAuthToken } from './utils';
@@ -46,4 +47,5 @@ global.generateLinks = generateLinks;
 global.processRemoveFolder = processRemoveFolder;
 global.resetCustomFolders = resetCustomFolders;
 global.showPicker = showPicker;
+global.showPrompt = showPrompt;
 global.showRemoveFolderPrompt = showRemoveFolderPrompt;
