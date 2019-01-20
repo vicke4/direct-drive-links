@@ -64,13 +64,3 @@ export const getHTMLTemplate = (type, sharedWithMe, folderList) => {
 };
 
 export const getOAuthToken = () => ScriptApp.getOAuthToken();
-
-/**
- * Function that gets the property of the document.
- *
- * @param {String} key to be used get the property of the document.
- */
-export const getProperty = key => {
-  const documentProperties = PropertiesService.getDocumentProperties();
-  return documentProperties.getProperty(key);
-};

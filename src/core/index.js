@@ -1,4 +1,4 @@
-import { getProperty, getSetProperty } from '../utils';
+import { getSetProperty } from '../utils';
 
 // Definition of the variables that holds information
 // about the user's Drive
@@ -333,7 +333,7 @@ const getSheetRows = displayFolderLinks => {
   let firstFolderNameLink;
   let firstFolderPath;
   let bgColorTemp;
-  const repeatFolderNames = getProperty('repeatFolders');
+  const repeatFolderNames = getSetProperty('repeatFolders', null, 'bool');
   const locale = Session.getActiveUserLocale().toLowerCase();
   let hyperlinkSeparator =
     ['de', 'es', 'it', 'nl', 'pl', 'pt', 'pt-PT', 'pt-br', 'tr', 'ru', 'vi'].indexOf(locale) === -1
@@ -355,7 +355,7 @@ const getSheetRows = displayFolderLinks => {
         firstFolderPath = driveObj[folderKey].path;
       }
 
-      if (repeatFolderNames === 'true' || oIndex === 0) {
+      if (repeatFolderNames || oIndex === 0) {
         folderPath = firstFolderPath;
         folderLink = firstFolderLink;
         folderNameLink = firstFolderNameLink;
@@ -484,7 +484,7 @@ const setMenuItems = e => {
     autoRefresh = getSetProperty('autoRefresh', 'document', 'bool');
     repeatFolders = getSetProperty('repeatFolders', 'document', 'bool');
     displayFolderLinks = getSetProperty('displayFolderLinks', 'document', 'bool');
-    used = getProperty('installed');
+    used = getSetProperty('installed', null, 'bool');
   }
 
   const menuObj = [
@@ -592,16 +592,15 @@ const init = (fromTrigger, resetHeaders) => {
   buildData('folderMap', 'items(id,title,ownedByMe,parents(id,isRoot))');
   buildData(
     'driveObj',
-    `
-      items(id,labels/restricted,ownedByMe,owners(emailAddress,permissionId),
-      mimeType,parents(id,isRoot),permissionIds,
-      permissions(emailAddress,id,role),title,webContentLink)
-    `
+    // eslint-disable-next-line no-multi-str
+    'items(id,labels/restricted,ownedByMe,owners(emailAddress,permissionId),\
+      mimeType,parents(id,isRoot),permissionIds,\
+      permissions(emailAddress,id,role),title,webContentLink)'
   );
   writeToSpreadSheet(resetHeaders);
 
   // Sets autorefresh trigger on install of addon
-  if (!getProperty('installed')) {
+  if (!getSetProperty('installed', null, 'bool')) {
     toggle('installed');
     toggleAutoRefresh();
     setMenuItems({
